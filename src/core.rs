@@ -94,8 +94,11 @@ impl ShiShuAState {
 
     #[inline(always)]
     fn round(&mut self) -> [u64x4; STATE_SIZE] {
-        let shu_0 = u32x8::new(4, 3, 2, 1, 0, 7, 6, 5);
-        let shu_1 = u32x8::new(2, 1, 0, 7, 6, 5, 4, 3);
+        let shuffle = [
+            u32x8::new(4, 3, 2, 1, 0, 7, 6, 5),
+            u32x8::new(2, 1, 0, 7, 6, 5, 4, 3),
+        ];
+
         let increment = u64x4::new(1, 3, 5, 7);
 
         let ShiShuAState {
@@ -119,10 +122,10 @@ impl ShiShuAState {
             state_u32.shuffle1_dyn(shuffle).into_bits()
         }
 
-        let t0 = shuffle_u64_as_u32(state[0], shu_0);
-        let t1 = shuffle_u64_as_u32(state[1], shu_1);
-        let t2 = shuffle_u64_as_u32(state[2], shu_0);
-        let t3 = shuffle_u64_as_u32(state[3], shu_1);
+        let t0 = shuffle_u64_as_u32(state[0], shuffle[0]);
+        let t1 = shuffle_u64_as_u32(state[1], shuffle[1]);
+        let t2 = shuffle_u64_as_u32(state[2], shuffle[0]);
+        let t3 = shuffle_u64_as_u32(state[3], shuffle[1]);
 
         state[0] = t0 + u0;
         state[1] = t1 + u1;
