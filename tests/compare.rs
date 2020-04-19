@@ -22,12 +22,15 @@ fn generate_rust(seed: u64, length: usize) -> Vec<u8> {
 }
 
 fn compare(seed: u64, length: usize) {
-    assert_eq!(
-        generate_c(seed, length),
-        generate_rust(seed, length),
-        "Seed: {:#X}",
-        seed
-    );
+    dbg!(length);
+
+    let c_value = generate_c(seed, length);
+    let rust_value = generate_rust(seed, length);
+
+    dbg!(c_value.len());
+    dbg!(rust_value.len());
+
+    assert!(c_value == rust_value, "Seed: {:#X}", seed);
 }
 
 #[test]
@@ -36,8 +39,18 @@ fn native_works() {
 }
 
 #[test]
-fn native_compare() {
+fn native_compare_zero() {
     compare(0, 4 * 4 * 8);
+}
+
+#[test]
+fn native_compare_1234() {
+    compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8);
+}
+
+#[test]
+fn native_compare_long() {
+    compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8 * 100);
 }
 
 const COMPARE_ZERO: [u8; 128] = [
