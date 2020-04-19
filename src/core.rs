@@ -85,7 +85,10 @@ impl ShiShuAState {
 
         for (group, value) in raw.iter().enumerate() {
             let group_slice_index = group * STATE_LANES;
-            value.write_to_slice_unaligned(&mut output[group_slice_index..]);
+            for i in 0..STATE_LANES {
+                output[group_slice_index + i] =
+                    value.extract(STATE_LANES - 1 - i);
+            }
         }
 
         output
@@ -93,9 +96,39 @@ impl ShiShuAState {
 
     #[inline(always)]
     fn round(&mut self) -> [u64x4; STATE_SIZE] {
+        const fn correct_index(index: u32) -> u32 {
+            (u32x8::lanes() as u32 - 1 - index) ^ 1
+        }
+
+        // Shuffle values work differently in Rust than in the C source.
+        //
+        // High and low 32 bits are flipped.
+        // Indexing is the other way around
+        //
+        // I spent quite some time figuring this out.
         let shuffle = [
-            u32x8::new(4, 3, 2, 1, 0, 7, 6, 5),
-            u32x8::new(2, 1, 0, 7, 6, 5, 4, 3),
+            // u32x8::new(4, 3, 2, 1, 0, 7, 6, 5),
+            u32x8::new(
+                correct_index(3),
+                correct_index(4),
+                correct_index(1),
+                correct_index(2),
+                correct_index(7),
+                correct_index(0),
+                correct_index(5),
+                correct_index(6),
+            ),
+            // u32x8::new(2, 1, 0, 7, 6, 5, 4, 3),
+            u32x8::new(
+                correct_index(1),
+                correct_index(2),
+                correct_index(7),
+                correct_index(0),
+                correct_index(5),
+                correct_index(6),
+                correct_index(3),
+                correct_index(4),
+            ),
         ];
 
         let increment = u64x4::new(1, 3, 5, 7);
