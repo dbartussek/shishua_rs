@@ -1,5 +1,5 @@
 use crate::{
-    core::{GROUP_SIZE, STATE_SIZE},
+    core::{STATE_LANES, STATE_SIZE},
     ShiShuAState,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
@@ -7,7 +7,7 @@ use rand_core::{Error, RngCore};
 use std::io::Cursor;
 
 const STATE_WRAPPER_BUFFER_SIZE: usize =
-    GROUP_SIZE * STATE_SIZE * std::mem::size_of::<u64>();
+    STATE_LANES * STATE_SIZE * std::mem::size_of::<u64>();
 
 pub struct ShiShuARng {
     state: ShiShuAState,
@@ -16,7 +16,7 @@ pub struct ShiShuARng {
 }
 
 impl ShiShuARng {
-    pub fn new(seed: [u64; GROUP_SIZE]) -> Self {
+    pub fn new(seed: [u64; STATE_LANES]) -> Self {
         ShiShuARng {
             state: ShiShuAState::new(seed),
             buffer: [0; STATE_WRAPPER_BUFFER_SIZE],

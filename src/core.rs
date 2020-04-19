@@ -1,6 +1,6 @@
 use packed_simd::{u32x8, u64x4, IntoBits};
 
-pub const GROUP_SIZE: usize = 4;
+pub const STATE_LANES: usize = u64x4::lanes();
 pub const STATE_SIZE: usize = 4;
 
 #[derive(Copy, Clone)]
@@ -30,11 +30,11 @@ const PHI: [u64; 16] = [
 ];
 
 impl ShiShuAState {
-    pub fn new(seed: [u64; GROUP_SIZE]) -> Self {
+    pub fn new(seed: [u64; STATE_LANES]) -> Self {
         const STEPS: usize = 13;
         const ROUNDS: usize = 1;
 
-        let mut buffer = [0u64; GROUP_SIZE * STATE_SIZE * ROUNDS];
+        let mut buffer = [0u64; STATE_LANES * STATE_SIZE * ROUNDS];
 
         let mut state = ShiShuAState {
             state: [
@@ -69,24 +69,23 @@ impl ShiShuAState {
     }
 
     pub fn generate(&mut self, output_slice: &mut [u64]) {
-        assert_eq!(output_slice.len() % (GROUP_SIZE * STATE_SIZE), 0);
+        assert_eq!(output_slice.len() % (STATE_LANES * STATE_SIZE), 0);
 
         for output_chunk in
-            output_slice.chunks_exact_mut(GROUP_SIZE * STATE_SIZE)
+            output_slice.chunks_exact_mut(STATE_LANES * STATE_SIZE)
         {
             let output = self.round_unpack();
             output_chunk.copy_from_slice(&output);
         }
     }
 
-    pub fn round_unpack(&mut self) -> [u64; STATE_SIZE * GROUP_SIZE] {
+    pub fn round_unpack(&mut self) -> [u64; STATE_SIZE * STATE_LANES] {
         let raw = self.round();
-        let mut output = [0u64; STATE_SIZE * GROUP_SIZE];
+        let mut output = [0u64; STATE_SIZE * STATE_LANES];
 
         for (group, value) in raw.iter().enumerate() {
-            for i in 0..GROUP_SIZE {
-                output[group * STATE_SIZE + i] = value.extract(i);
-            }
+            let group_slice_index = group * STATE_LANES;
+            value.write_to_slice_unaligned(&mut output[group_slice_index..]);
         }
 
         output
@@ -119,7 +118,9 @@ impl ShiShuAState {
 
         fn shuffle_u64_as_u32(state: u64x4, shuffle: u32x8) -> u64x4 {
             let state_u32: u32x8 = state.into_bits();
-            state_u32.shuffle1_dyn(shuffle).into_bits()
+            let shuffled = state_u32.shuffle1_dyn(shuffle);
+
+            shuffled.into_bits()
         }
 
         let t0 = shuffle_u64_as_u32(state[0], shuffle[0]);
