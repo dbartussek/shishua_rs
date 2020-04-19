@@ -30,7 +30,7 @@ impl ShiShuARng {
 
             let data = self.state.round_unpack();
 
-            let mut buffer = &mut self.buffer.as_mut();
+            let buffer = &mut self.buffer.as_mut();
             for v in &data {
                 buffer.write_u64::<LittleEndian>(*v).unwrap();
             }

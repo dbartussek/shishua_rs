@@ -83,7 +83,7 @@ impl ShiShuAState {
         let raw = self.round();
         let mut output = [0u64; STATE_SIZE * GROUP_SIZE];
 
-        for (group, value) in raw.into_iter().enumerate() {
+        for (group, value) in raw.iter().enumerate() {
             for i in 0..GROUP_SIZE {
                 output[group * STATE_SIZE + i] = value.extract(i);
             }
@@ -108,9 +108,9 @@ impl ShiShuAState {
         } = self;
 
         // Perform the round
-        state[1] = state[1] + *counter;
-        state[3] = state[3] + *counter;
-        *counter = *counter + increment;
+        state[1] += *counter;
+        state[3] += *counter;
+        *counter += increment;
 
         let u0 = state[0] >> 1;
         let u1 = state[1] >> 3;
