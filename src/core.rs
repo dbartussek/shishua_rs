@@ -1,4 +1,4 @@
-use packed_simd::{u32x8, u64x4, IntoBits};
+use packed_simd_2::{u32x8, u64x4, IntoBits};
 
 pub const STATE_LANES: usize = u64x4::lanes();
 pub const STATE_SIZE: usize = 4;

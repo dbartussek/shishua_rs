@@ -5,7 +5,7 @@ authors = ["Dario Bartussek <d.bartussek@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-packed_simd = { version = "0.3.3", features = ["into_bits"] }
+packed_simd_2 = { version = "0.3.4", features = ["into_bits"] }
 
 rand_core = "0.5.1"
 
