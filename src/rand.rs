@@ -24,7 +24,7 @@ impl ShiShuARng {
         }
     }
 
-    fn get_byte(&mut self) -> u8 {
+    pub fn get_byte(&mut self) -> u8 {
         if self.buffer_index >= STATE_WRAPPER_BUFFER_SIZE {
             self.buffer_index = 0;
 
@@ -44,25 +44,25 @@ impl ShiShuARng {
 }
 
 impl RngCore for ShiShuARng {
-    fn next_u32(&mut self) -> u32 {
+    pub fn next_u32(&mut self) -> u32 {
         let mut buffer = [0u8; std::mem::size_of::<u32>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u32::<LittleEndian>().unwrap()
     }
 
-    fn next_u64(&mut self) -> u64 {
+    pub fn next_u64(&mut self) -> u64 {
         let mut buffer = [0u8; std::mem::size_of::<u64>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u64::<LittleEndian>().unwrap()
     }
 
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
+    pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         for byte in dest.iter_mut() {
             *byte = self.get_byte();
         }
     }
 
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+    pub fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
         self.fill_bytes(dest);
         Ok(())
     }
