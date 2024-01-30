@@ -24,7 +24,7 @@ impl ShiShuARng {
         }
     }
 
-    fn get_byte(&mut self) -> u8 {
+    pub fn get_byte(&mut self) -> u8 {
         if self.buffer_index >= STATE_WRAPPER_BUFFER_SIZE {
             self.buffer_index = 0;
 
