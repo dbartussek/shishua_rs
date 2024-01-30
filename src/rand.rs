@@ -44,25 +44,25 @@ impl ShiShuARng {
 }
 
 impl RngCore for ShiShuARng {
-    pub fn next_u32(&mut self) -> u32 {
+    fn next_u32(&mut self) -> u32 {
         let mut buffer = [0u8; std::mem::size_of::<u32>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u32::<LittleEndian>().unwrap()
     }
 
-    pub fn next_u64(&mut self) -> u64 {
+    fn next_u64(&mut self) -> u64 {
         let mut buffer = [0u8; std::mem::size_of::<u64>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u64::<LittleEndian>().unwrap()
     }
 
-    pub fn fill_bytes(&mut self, dest: &mut [u8]) {
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
         for byte in dest.iter_mut() {
             *byte = self.get_byte();
         }
     }
 
-    pub fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
         self.fill_bytes(dest);
         Ok(())
     }
