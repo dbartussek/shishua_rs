@@ -3,8 +3,7 @@ use crate::{
     ShiShuAState,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand_core::RngCore;
-use std::io::Cursor;
+use rand_core::{RngCore, SeedableRng};
 
 const STATE_WRAPPER_BUFFER_SIZE: usize =
     STATE_LANES * STATE_SIZE * size_of::<u64>();
@@ -50,18 +49,30 @@ impl RngCore for ShiShuARng {
     fn next_u32(&mut self) -> u32 {
         let mut buffer = [0u8; size_of::<u32>()];
         self.fill_bytes(&mut buffer);
-        Cursor::new(buffer).read_u32::<LittleEndian>().unwrap()
+        buffer.as_slice().read_u32::<LittleEndian>().unwrap()
     }
 
     fn next_u64(&mut self) -> u64 {
         let mut buffer = [0u8; size_of::<u64>()];
         self.fill_bytes(&mut buffer);
-        Cursor::new(buffer).read_u64::<LittleEndian>().unwrap()
+        buffer.as_slice().read_u64::<LittleEndian>().unwrap()
     }
 
     fn fill_bytes(&mut self, dest: &mut [u8]) {
         for byte in dest.iter_mut() {
             *byte = self.get_byte();
         }
+    }
+}
+
+impl SeedableRng for ShiShuARng {
+    type Seed = [u8; STATE_LANES * size_of::<u64>()];
+
+    fn from_seed(seed: Self::Seed) -> Self {
+        Self::new(bytemuck::cast(seed))
+    }
+
+    fn seed_from_u64(seed: u64) -> Self {
+        Self::new([seed, 0, 0, 0])
     }
 }

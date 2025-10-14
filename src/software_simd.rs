@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 
 use bytemuck::{Pod, Zeroable};
-use std::{
+use core::{
     num::Wrapping,
     ops::{Add, AddAssign, BitXor, Deref, Shr},
 };

@@ -1,4 +1,4 @@
-use rand_core::RngCore;
+use rand_core::{RngCore, SeedableRng};
 use shishua::ShiShuARng;
 use std::process::Command;
 
@@ -16,7 +16,7 @@ fn generate_c(seed: u64, length: usize) -> Vec<u8> {
 fn generate_rust(seed: u64, length: usize) -> Vec<u8> {
     let mut buffer = vec![0u8; length];
 
-    ShiShuARng::new([seed, 0, 0, 0]).fill_bytes(&mut buffer);
+    ShiShuARng::seed_from_u64(seed).fill_bytes(&mut buffer);
 
     buffer
 }
@@ -34,21 +34,25 @@ fn compare(seed: u64, length: usize) {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn native_works() {
     generate_c(0x123, 8);
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn native_compare_zero() {
     compare(0, 4 * 4 * 8);
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn native_compare_1234() {
     compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8);
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn native_compare_long() {
     compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8 * 100);
 }
@@ -73,6 +77,7 @@ fn hard_coded_zero() {
 }
 
 #[test]
+#[cfg_attr(miri, ignore)]
 fn hard_coded_zero_c() {
     assert_eq!(&COMPARE_ZERO as &[u8], generate_c(0, 4 * 4 * 8).as_slice());
 }

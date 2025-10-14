@@ -1,5 +1,5 @@
 #[cfg(feature = "nightly")]
-use std::simd::{simd_swizzle, u32x8, u64x4};
+use core::simd::{simd_swizzle, u32x8, u64x4};
 
 #[cfg(not(feature = "nightly"))]
 use crate::{simd_swizzle, software_simd::*};
