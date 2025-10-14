@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Dario Bartussek <d.bartussek@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
+description = "Port of the shishua rng algorithm to Rust"
+repository = "https://github.com/dbartussek/shishua_rs"
 
 [dependencies]
 bytemuck = { version = "1.24.0", features = ["nightly_portable_simd"] }

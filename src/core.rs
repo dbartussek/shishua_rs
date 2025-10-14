@@ -29,6 +29,7 @@ const PHI: [u64; 16] = [
     0xFEC507705E4AE6E5,
 ];
 
+/// The raw ShiShuA implementation. Random values are generated in `[u64; 16]` chunks can be generated using [round_unpack](ShiShuAState::round_unpack).
 impl ShiShuAState {
     pub fn new(seed: [u64; STATE_LANES]) -> Self {
         const STEPS: usize = 13;
@@ -78,7 +79,7 @@ impl ShiShuAState {
         state
     }
 
-    pub fn generate(&mut self, output_slice: &mut [u64]) {
+    fn generate(&mut self, output_slice: &mut [u64]) {
         assert_eq!(output_slice.len() % (STATE_LANES * STATE_SIZE), 0);
 
         for output_chunk in

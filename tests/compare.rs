@@ -1,5 +1,5 @@
 use rand_core::RngCore;
-use shishua_rs::ShiShuARng;
+use shishua::ShiShuARng;
 use std::process::Command;
 
 fn generate_c(seed: u64, length: usize) -> Vec<u8> {

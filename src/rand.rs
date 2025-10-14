@@ -9,6 +9,9 @@ use std::io::Cursor;
 const STATE_WRAPPER_BUFFER_SIZE: usize =
     STATE_LANES * STATE_SIZE * size_of::<u64>();
 
+/// A rand compatible wrapper around the raw ShiShuAState.
+///
+/// An internal buffer is used to split up big chunks of randomness into the requested size.
 pub struct ShiShuARng {
     state: ShiShuAState,
     buffer: [u8; STATE_WRAPPER_BUFFER_SIZE],
