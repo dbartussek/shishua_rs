@@ -31,6 +31,10 @@ where
     pub fn from_array(array: [T; N]) -> Self {
         Self(array)
     }
+    
+    pub fn to_array(self) -> [T; N] {
+        self.0
+    }
 }
 
 impl<T, const N: usize> Deref for SoftwareSimd<T, N> {
@@ -38,6 +42,12 @@ impl<T, const N: usize> Deref for SoftwareSimd<T, N> {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl<T, const N: usize> From<[T; N]> for SoftwareSimd<T, N> {
+    fn from(value: [T; N]) -> Self {
+        Self(value)
     }
 }
 

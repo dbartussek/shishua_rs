@@ -5,7 +5,11 @@ pub(crate) mod core;
 #[cfg(feature = "rand")]
 pub(crate) mod rand;
 
-#[cfg(not(feature = "nightly"))]
+
+#[cfg(all(not(feature = "nightly"), feature = "wide"))]
+mod wide_support;
+
+#[cfg(all(not(feature = "nightly"), not(feature = "wide")))]
 mod software_simd;
 
 pub use crate::core::ShiShuAState;

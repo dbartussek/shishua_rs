@@ -1,8 +1,12 @@
+#[cfg(all(not(feature = "nightly"), not(feature = "wide")))]
+use crate::{simd_swizzle, software_simd::*};
 #[cfg(feature = "nightly")]
 use core::simd::{simd_swizzle, u32x8, u64x4};
-
-#[cfg(not(feature = "nightly"))]
-use crate::{simd_swizzle, software_simd::*};
+#[cfg(all(not(feature = "nightly"), feature = "wide"))]
+use {
+    crate::{simd_swizzle, wide_support::*},
+    wide::{u32x8, u64x4},
+};
 
 pub const STATE_LANES: usize = 4;
 pub const STATE_SIZE: usize = 4;
@@ -44,25 +48,25 @@ impl ShiShuAState {
 
         let mut state = ShiShuAState {
             state: [
-                u64x4::from_array([
+                u64x4::from([
                     PHI[3],
                     PHI[2] ^ seed[1],
                     PHI[1],
                     PHI[0] ^ seed[0],
                 ]),
-                u64x4::from_array([
+                u64x4::from([
                     PHI[7],
                     PHI[6] ^ seed[3],
                     PHI[5],
                     PHI[4] ^ seed[2],
                 ]),
-                u64x4::from_array([
+                u64x4::from([
                     PHI[11],
                     PHI[10] ^ seed[3],
                     PHI[9],
                     PHI[8] ^ seed[2],
                 ]),
-                u64x4::from_array([
+                u64x4::from([
                     PHI[15],
                     PHI[14] ^ seed[1],
                     PHI[13],
@@ -102,7 +106,7 @@ impl ShiShuAState {
         for (group, value) in raw.iter().enumerate() {
             let group_slice_index = group * STATE_LANES;
             for i in 0..STATE_LANES {
-                output[group_slice_index + i] = value[STATE_LANES - 1 - i];
+                output[group_slice_index + i] = value.to_array()[STATE_LANES - 1 - i];
             }
         }
 
@@ -146,7 +150,7 @@ impl ShiShuAState {
             ],
         ];
 
-        let increment = u64x4::from_array([1, 3, 5, 7]);
+        let increment = u64x4::from([1, 3, 5, 7]);
 
         let ShiShuAState {
             state,

@@ -3,4 +3,5 @@ Cargo.lock
 
 .idea
 
-shishua
+/shishua
+/asm
