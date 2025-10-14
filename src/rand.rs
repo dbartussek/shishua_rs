@@ -25,6 +25,7 @@ impl ShiShuARng {
         }
     }
 
+    #[inline(always)]
     pub fn get_byte(&mut self) -> u8 {
         if self.buffer_index >= STATE_WRAPPER_BUFFER_SIZE {
             self.buffer_index = 0;
@@ -59,7 +60,25 @@ impl RngCore for ShiShuARng {
         u64::from_le_bytes(buffer)
     }
 
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
+    fn fill_bytes(&mut self, mut dest: &mut [u8]) {
+        while self.buffer_index < STATE_WRAPPER_BUFFER_SIZE && dest.len() > 0 {
+            dest[0] = self.buffer[self.buffer_index];
+            self.buffer_index += 1;
+            dest = &mut dest[1..];
+        }
+
+        while dest.len() >= STATE_WRAPPER_BUFFER_SIZE {
+            let data = self.state.round_unpack();
+
+            for (index, value) in data.iter().enumerate() {
+                dest[(index * size_of::<u64>())
+                    ..((index + 1) * size_of::<u64>())]
+                    .copy_from_slice(&value.to_le_bytes());
+            }
+
+            dest = &mut dest[STATE_WRAPPER_BUFFER_SIZE..];
+        }
+
         for byte in dest.iter_mut() {
             *byte = self.get_byte();
         }
