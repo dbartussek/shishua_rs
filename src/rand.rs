@@ -71,8 +71,4 @@ impl SeedableRng for ShiShuARng {
     fn from_seed(seed: Self::Seed) -> Self {
         Self::new(bytemuck::cast(seed))
     }
-
-    fn seed_from_u64(seed: u64) -> Self {
-        Self::new([seed, 0, 0, 0])
-    }
 }

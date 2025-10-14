@@ -1,11 +1,18 @@
-use rand_core::{RngCore, SeedableRng};
+use rand_core::RngCore;
 use shishua::ShiShuARng;
 use std::process::Command;
 
-fn generate_c(seed: u64, length: usize) -> Vec<u8> {
+fn to_seed(base_seed: u64) -> [u64; 4] {
+    [base_seed, base_seed + 1, base_seed + 2, base_seed + 3]
+}
+
+fn generate_c(seed: [u64; 4], length: usize) -> Vec<u8> {
     Command::new("./shishua")
         .arg("--seed")
-        .arg(format!("{:x}", seed))
+        .arg(format!(
+            "{:x}{:x}{:x}{:x}",
+            seed[0], seed[1], seed[2], seed[3]
+        ))
         .arg("--bytes")
         .arg(format!("{}", length))
         .output()
@@ -13,48 +20,54 @@ fn generate_c(seed: u64, length: usize) -> Vec<u8> {
         .stdout
 }
 
-fn generate_rust(seed: u64, length: usize) -> Vec<u8> {
+fn generate_rust(seed: [u64; 4], length: usize) -> Vec<u8> {
     let mut buffer = vec![0u8; length];
 
-    ShiShuARng::seed_from_u64(seed).fill_bytes(&mut buffer);
+    ShiShuARng::new(seed).fill_bytes(&mut buffer);
 
     buffer
 }
 
-fn compare(seed: u64, length: usize) {
+fn compare(seed: [u64; 4], length: usize) {
     dbg!(length);
-
-    let c_value = generate_c(seed, length);
-    let rust_value = generate_rust(seed, length);
+    let c_value = generate_c(seed.clone(), length);
+    let rust_value = generate_rust(seed.clone(), length);
 
     dbg!(c_value.len());
     dbg!(rust_value.len());
 
-    assert!(c_value == rust_value, "Seed: {:#X}", seed);
+    assert!(
+        c_value == rust_value,
+        "Seed: {:#X}{:#X}{:#X}{:#X}",
+        seed[0],
+        seed[1],
+        seed[2],
+        seed[3]
+    );
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn native_works() {
-    generate_c(0x123, 8);
+    generate_c(to_seed(0x123), 8);
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn native_compare_zero() {
-    compare(0, 4 * 4 * 8);
+    compare([0, 0, 0, 0], 4 * 4 * 8);
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn native_compare_1234() {
-    compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8);
+    compare(to_seed(0x1234_5678_9ABC_DEF0), 4 * 4 * 8);
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn native_compare_long() {
-    compare(0x1234_5678_9ABC_DEF0, 4 * 4 * 8 * 100);
+    compare(to_seed(0x1234_5678_9ABC_DEF0), 4 * 4 * 8 * 100);
 }
 
 const COMPARE_ZERO: [u8; 128] = [
@@ -72,12 +85,15 @@ const COMPARE_ZERO: [u8; 128] = [
 fn hard_coded_zero() {
     assert_eq!(
         &COMPARE_ZERO as &[u8],
-        generate_rust(0, 4 * 4 * 8).as_slice()
+        generate_rust([0, 0, 0, 0], 4 * 4 * 8).as_slice()
     );
 }
 
 #[test]
 #[cfg_attr(miri, ignore)]
 fn hard_coded_zero_c() {
-    assert_eq!(&COMPARE_ZERO as &[u8], generate_c(0, 4 * 4 * 8).as_slice());
+    assert_eq!(
+        &COMPARE_ZERO as &[u8],
+        generate_c([0, 0, 0, 0], 4 * 4 * 8).as_slice()
+    );
 }
