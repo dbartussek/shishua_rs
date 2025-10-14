@@ -2,7 +2,6 @@ use crate::{
     core::{STATE_LANES, STATE_SIZE},
     ShiShuAState,
 };
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use rand_core::{RngCore, SeedableRng};
 
 const STATE_WRAPPER_BUFFER_SIZE: usize =
@@ -33,8 +32,10 @@ impl ShiShuARng {
             let data = self.state.round_unpack();
 
             let buffer = &mut self.buffer.as_mut();
-            for v in &data {
-                buffer.write_u64::<LittleEndian>(*v).unwrap();
+            for (index, value) in data.iter().enumerate() {
+                buffer[(index * size_of::<u64>())
+                    ..((index + 1) * size_of::<u64>())]
+                    .copy_from_slice(&value.to_le_bytes());
             }
         }
 
@@ -49,13 +50,13 @@ impl RngCore for ShiShuARng {
     fn next_u32(&mut self) -> u32 {
         let mut buffer = [0u8; size_of::<u32>()];
         self.fill_bytes(&mut buffer);
-        buffer.as_slice().read_u32::<LittleEndian>().unwrap()
+        u32::from_le_bytes(buffer)
     }
 
     fn next_u64(&mut self) -> u64 {
         let mut buffer = [0u8; size_of::<u64>()];
         self.fill_bytes(&mut buffer);
-        buffer.as_slice().read_u64::<LittleEndian>().unwrap()
+        u64::from_le_bytes(buffer)
     }
 
     fn fill_bytes(&mut self, dest: &mut [u8]) {

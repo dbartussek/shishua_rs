@@ -31,7 +31,7 @@ where
     pub fn from_array(array: [T; N]) -> Self {
         Self(array)
     }
-    
+
     pub fn to_array(self) -> [T; N] {
         self.0
     }

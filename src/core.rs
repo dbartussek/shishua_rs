@@ -106,7 +106,8 @@ impl ShiShuAState {
         for (group, value) in raw.iter().enumerate() {
             let group_slice_index = group * STATE_LANES;
             for i in 0..STATE_LANES {
-                output[group_slice_index + i] = value.to_array()[STATE_LANES - 1 - i];
+                output[group_slice_index + i] =
+                    value.to_array()[STATE_LANES - 1 - i];
             }
         }
 
