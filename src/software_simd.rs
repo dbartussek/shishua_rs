@@ -28,10 +28,6 @@ where
         Self([value; N])
     }
 
-    pub fn from_array(array: [T; N]) -> Self {
-        Self(array)
-    }
-
     pub fn to_array(self) -> [T; N] {
         self.0
     }
@@ -105,12 +101,4 @@ where
 
         self
     }
-}
-
-#[doc(hidden)]
-#[macro_export]
-macro_rules! simd_swizzle {
-    ($simd:expr, $shuffle:expr) => {
-        SoftwareSimd::from_array($shuffle.map(|i| $simd[i]))
-    };
 }

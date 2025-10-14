@@ -1,12 +1,20 @@
 #[cfg(all(not(feature = "nightly"), not(feature = "wide")))]
-use crate::{simd_swizzle, software_simd::*};
+use crate::software_simd::*;
 #[cfg(feature = "nightly")]
 use core::simd::{simd_swizzle, u32x8, u64x4};
 #[cfg(all(not(feature = "nightly"), feature = "wide"))]
 use {
-    crate::{simd_swizzle, wide_support::*},
+    crate::wide_support::*,
     wide::{u32x8, u64x4},
 };
+
+#[cfg(not(feature = "nightly"))]
+macro_rules! simd_swizzle {
+    ($simd:expr, $shuffle:expr) => {
+        $shuffle.map(|i| $simd.to_array()[i])
+    };
+}
+
 
 pub const STATE_LANES: usize = 4;
 pub const STATE_SIZE: usize = 4;
