@@ -3,7 +3,7 @@ use crate::{
     ShiShuAState,
 };
 use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use rand_core::{Error, RngCore};
+use rand_core::RngCore;
 use std::io::Cursor;
 
 const STATE_WRAPPER_BUFFER_SIZE: usize =
@@ -60,10 +60,5 @@ impl RngCore for ShiShuARng {
         for byte in dest.iter_mut() {
             *byte = self.get_byte();
         }
-    }
-
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
-        self.fill_bytes(dest);
-        Ok(())
     }
 }

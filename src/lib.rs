@@ -1,3 +1,5 @@
+#![feature(portable_simd)]
+
 pub(crate) mod core;
 pub(crate) mod rand;
 
