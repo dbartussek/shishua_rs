@@ -1,23 +1,40 @@
 use rand_core::RngCore;
 use shishua::ShiShuARng;
-use std::process::Command;
 
 fn to_seed(base_seed: u64) -> [u64; 4] {
     [base_seed, base_seed + 1, base_seed + 2, base_seed + 3]
 }
 
 fn generate_c(seed: [u64; 4], length: usize) -> Vec<u8> {
-    Command::new("./shishua")
-        .arg("--seed")
-        .arg(format!(
-            "{:x}{:x}{:x}{:x}",
-            seed[0], seed[1], seed[2], seed[3]
-        ))
-        .arg("--bytes")
-        .arg(format!("{}", length))
-        .output()
-        .unwrap()
-        .stdout
+    let mut generate_bytes = length;
+    let excess = length % 512;
+    if excess != 0 {
+        generate_bytes += 512 - excess;
+    }
+
+    extern "C" {
+        fn shishua_bindings_init(seed: *const u64) -> *mut ();
+        fn shishua_bindings_destroy(state: *mut ());
+        fn shishua_bindings_generate(
+            state: *mut (),
+            buffer: *mut u8,
+            size: usize,
+        );
+    }
+
+    let mut buffer = vec![0; generate_bytes];
+    unsafe {
+        let generator = shishua_bindings_init(seed.as_ptr());
+        shishua_bindings_generate(
+            generator,
+            buffer.as_mut_ptr(),
+            generate_bytes,
+        );
+        shishua_bindings_destroy(generator);
+    }
+    buffer.resize(length, 0);
+
+    buffer
 }
 
 fn generate_rust(seed: [u64; 4], length: usize) -> Vec<u8> {
@@ -36,13 +53,10 @@ fn compare(seed: [u64; 4], length: usize) {
     dbg!(c_value.len());
     dbg!(rust_value.len());
 
-    assert!(
-        c_value == rust_value,
+    assert_eq!(
+        c_value, rust_value,
         "Seed: {:#X}{:#X}{:#X}{:#X}",
-        seed[0],
-        seed[1],
-        seed[2],
-        seed[3]
+        seed[0], seed[1], seed[2], seed[3]
     );
 }
 
