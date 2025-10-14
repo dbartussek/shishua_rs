@@ -1,14 +1,12 @@
+#[cfg(feature = "nightly")]
 use std::simd::{simd_swizzle, u32x8, u64x4};
 
-pub const STATE_LANES: usize = u64x4::LEN;
+#[cfg(not(feature = "nightly"))]
+use crate::{simd_swizzle, software_simd::*};
+
+pub const STATE_LANES: usize = 4;
 pub const STATE_SIZE: usize = 4;
 
-#[derive(Copy, Clone)]
-pub struct ShiShuAState {
-    state: [u64x4; STATE_SIZE],
-    output: [u64x4; STATE_SIZE],
-    counter: u64x4,
-}
 
 const PHI: [u64; 16] = [
     0x9E3779B97F4A7C15,
@@ -29,7 +27,14 @@ const PHI: [u64; 16] = [
     0xFEC507705E4AE6E5,
 ];
 
-/// The raw ShiShuA implementation. Random values are generated in `[u64; 16]` chunks can be generated using [round_unpack](ShiShuAState::round_unpack).
+/// The raw ShiShuA implementation. Random values are generated in `[u64; 16]` chunks with [round_unpack](ShiShuAState::round_unpack).
+#[derive(Copy, Clone)]
+pub struct ShiShuAState {
+    state: [u64x4; STATE_SIZE],
+    output: [u64x4; STATE_SIZE],
+    counter: u64x4,
+}
+
 impl ShiShuAState {
     pub fn new(seed: [u64; STATE_LANES]) -> Self {
         const STEPS: usize = 13;
