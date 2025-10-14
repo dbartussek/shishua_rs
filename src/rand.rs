@@ -7,7 +7,7 @@ use rand_core::RngCore;
 use std::io::Cursor;
 
 const STATE_WRAPPER_BUFFER_SIZE: usize =
-    STATE_LANES * STATE_SIZE * std::mem::size_of::<u64>();
+    STATE_LANES * STATE_SIZE * size_of::<u64>();
 
 pub struct ShiShuARng {
     state: ShiShuAState,
@@ -45,13 +45,13 @@ impl ShiShuARng {
 
 impl RngCore for ShiShuARng {
     fn next_u32(&mut self) -> u32 {
-        let mut buffer = [0u8; std::mem::size_of::<u32>()];
+        let mut buffer = [0u8; size_of::<u32>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u32::<LittleEndian>().unwrap()
     }
 
     fn next_u64(&mut self) -> u64 {
-        let mut buffer = [0u8; std::mem::size_of::<u64>()];
+        let mut buffer = [0u8; size_of::<u64>()];
         self.fill_bytes(&mut buffer);
         Cursor::new(buffer).read_u64::<LittleEndian>().unwrap()
     }

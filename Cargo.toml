@@ -6,6 +6,6 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-rand_core = "0.9.3"
-byteorder = "1.5.0"
 bytemuck = { version = "1.24.0", features = ["nightly_portable_simd"] }
+byteorder = "1.5.0"
+rand_core = "0.9.3"
