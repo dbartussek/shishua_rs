@@ -1,5 +1,5 @@
 [package]
-name = "shishua_rs"
+name = "shishua"
 version = "0.1.0"
 authors = ["Dario Bartussek <d.bartussek@gmail.com>"]
 edition = "2018"
